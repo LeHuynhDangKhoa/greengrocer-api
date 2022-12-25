@@ -24,3 +24,12 @@ class BaseController():
                 }
             }
         )
+
+    def handleResponse(self, code, data):
+        return jsonify(
+            {
+                "status": code,
+                "message": "",
+                "data": data
+            }
+        )

@@ -1,45 +1,47 @@
 import psycopg2
-import logging
+# import logging
 from psycopg2.extras import RealDictCursor, LoggingConnection
 
 class PGSQL():
     def __init__(self, config):
-        self.conn = psycopg2.connect(config["DATABASE_URL"], connection_factory=LoggingConnection)
+        # self.conn = psycopg2.connect(config["DATABASE_URL"], connection_factory=LoggingConnection)
+        self.conn = psycopg2.connect(config["DATABASE_URL"])
 
     def ProductList(self, categoryId, star, discount, priceFrom, priceTo, search, order, sort, limit, offset):
-        logging.basicConfig(level=logging.DEBUG)
-        logger = logging.getLogger("dev")
-        self.conn.initialize(logger)
+        # logging.basicConfig(level=logging.DEBUG)
+        # logger = logging.getLogger("dev")
+        # self.conn.initialize(logger)
 
         filter = "true"
         filterValue = []
         # Handle categoryId
-        if categoryId > 0:
-            filter += " and p.category_id = %s"
+        if categoryId != None:
+            filter += " and c.name = %s"
             filterValue.append(categoryId)
 
         # Handle star
-        if star > 0:
+        if star != None:
             filter += " and p.star = %s"
             filterValue.append(star)
 
         # Handle discount
-        if discount >= 0 and discount <=1:
-            filter += " and p.discount = %s"
-            filterValue.append(discount)
+        if discount != None:
+            if discount == 1:
+                filter += " and p.discount > %s"
+                filterValue.append(0)
 
         # Handle priceFrom
-        if priceFrom > 0:
+        if priceFrom != None:
             filter += " and p.price * (1 - p.discount) >= %s"
             filterValue.append(priceFrom)
 
         # Handle priceTo
-        if priceTo > 0:
+        if priceTo != None:
             filter += " and p.price * (1 - p.discount) <= %s"
             filterValue.append(priceTo)
 
         # Handle search
-        if search != "":
+        if search != None:
             filter += " and (p.name ilike " + "%s" + " || " + "%s" + " || " + "%s or p.description ilike " + "%s" + " || " + "%s" + " || " + "%s)"
             filterValue.append("%")
             filterValue.append(search)
@@ -56,7 +58,7 @@ class PGSQL():
         filterValue.append(limit)
         filterValue.append(offset)
 
-        raw = "select p.id, p.name, p.image, p.price::float, p.discount::float, p.price * (1 - p.discount)::float discounted_price, p.star, p.description, p.category_id, count(*) over() total from product p where " + filter
+        raw = "select p.id, p.name, p.image, p.price::float, p.discount::float, p.price * (1 - p.discount)::float discounted_price, p.star, p.description, p.category_id, count(*) over() total from product p left join category c on c.id = p.category_id where " + filter
         cursor = self.conn.cursor(cursor_factory=RealDictCursor)
         try:
             cursor.execute(raw, filterValue)
@@ -65,3 +67,27 @@ class PGSQL():
             return None, str(e)
         finally:
             cursor.close()        
+
+    def CategoryList(self):
+        raw = "select c.id, c.name, count(p.category_id) total from category c left join product p on c.id = p.category_id group by p.category_id, c.id, c.name"
+        cursor = self.conn.cursor(cursor_factory=RealDictCursor)
+        try:
+            cursor.execute(raw)
+            return cursor.fetchall(), None
+        except psycopg2.Error as e:
+            return None, str(e)
+        finally:
+            cursor.close()
+
+    def GetProductById(self, id):
+        raw = "select * from product where id = %s"
+        value = []
+        value.append(id)
+        cursor = self.conn.cursor(cursor_factory=RealDictCursor)
+        try:
+            cursor.execute(raw, value)
+            return cursor.fetchone(), None
+        except psycopg2.Error as e:
+            return None, str(e)
+        finally:
+            cursor.close()

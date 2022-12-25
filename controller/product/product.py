@@ -3,6 +3,7 @@ from database.pgsql import PGSQL
 from controller.base.base import BaseController
 from http import HTTPStatus
 from pkg.message.message import Message, Constants
+from flask_cors import CORS, cross_origin
 
 class ProductController(BaseController):
     def __init__(self, pgsql: PGSQL):
@@ -14,16 +15,14 @@ class ProductController(BaseController):
         @product.route('/products', methods=['GET'])
         def ProductList():           
             # Validate category_id > 0
-            categoryId = request.args.get("category_id")
-            if categoryId:
-                try:
-                    categoryId = int(categoryId)
-                    if categoryId <= 0:
-                        raise ValueError(Message[Constants.MSG_INVALID_CATEGORY_ID])
-                except ValueError as e:
-                    return self.handleError(HTTPStatus.BAD_REQUEST.value, Message[Constants.MSG_INVALID_CATEGORY_ID])
-            else:
-                categoryId = 0
+            categoryId = request.args.get("category")
+            # if categoryId:
+            #     try:
+            #         categoryId = int(categoryId)
+            #         if categoryId <= 0:
+            #             raise ValueError(Message[Constants.MSG_INVALID_CATEGORY_ID])
+            #     except ValueError as e:
+            #         return self.handleError(HTTPStatus.BAD_REQUEST.value, Message[Constants.MSG_INVALID_CATEGORY_ID])
 
             # Validate star > 0
             star = request.args.get("star")
@@ -34,44 +33,36 @@ class ProductController(BaseController):
                         raise ValueError(Message[Constants.MSG_INVALID_STAR])
                 except ValueError as e:
                     return self.handleError(HTTPStatus.BAD_REQUEST.value, Message[Constants.MSG_INVALID_STAR])
-            else:
-                star = 0
 
-            # Validate 0 <= discount <= 1
+            # Validate discount = true or false
             discount = request.args.get("discount")
             if discount:
-                try:
-                    discount = float(discount)
-                    if discount < 0 or discount > 1:
-                        raise ValueError(Message[Constants.MSG_INVALID_DISCOUNT])
-                except ValueError as e:
+                if discount == "true":
+                    discount = 1
+                elif discount == "false":
+                    discount = 0
+                else:
                     return self.handleError(HTTPStatus.BAD_REQUEST.value, Message[Constants.MSG_INVALID_DISCOUNT])
-            else:
-                discount = -1
 
             # Validate price_from > 0
             priceFrom = request.args.get("price_from")
             if priceFrom:
                 try:
                     priceFrom = float(priceFrom)
-                    if priceFrom <= 0:
+                    if priceFrom < 0:
                         raise ValueError(Message[Constants.MSG_INVALID_PRICE_FROM])
                 except ValueError as e:
                     return self.handleError(HTTPStatus.BAD_REQUEST.value, Message[Constants.MSG_INVALID_PRICE_FROM])
-            else:
-                priceFrom = 0
 
             # Validate price_from > 0
             priceTo = request.args.get("price_to")
             if priceTo:
                 try:
                     priceTo = float(priceTo)
-                    if priceTo <= 0:
+                    if priceTo < 0:
                         raise ValueError(Message[Constants.MSG_INVALID_PRICE_TO])
                 except ValueError as e:
                     return self.handleError(HTTPStatus.BAD_REQUEST.value, Message[Constants.MSG_INVALID_PRICE_TO])
-            else:
-                priceTo = 0
 
             # Validate limit
             limit = request.args.get("limit")
@@ -125,5 +116,28 @@ class ProductController(BaseController):
                 if len(res) > 0:
                     total = res[0]["total"]
                 return self.handleResponseList(HTTPStatus.OK.value, limit, offset, total, res)
+
+        @product.route('/categories', methods=['GET'])
+        def CategoryList():
+            res, err = self.pgsql.CategoryList()
+            if err != None:
+                return self.handleError(HTTPStatus.INTERNAL_SERVER_ERROR.value, err)
+            else:
+                return self.handleResponse(HTTPStatus.OK.value, res)
+
+        @product.route('/products/<id>', methods=['GET'])
+        def ProductView(id):
+            try:
+                id = int(id)
+                res, err = self.pgsql.GetProductById(id)
+                if err != None:
+                    return self.handleError(HTTPStatus.INTERNAL_SERVER_ERROR.value, err)
+                else:
+                    if res != None:
+                        return self.handleResponse(HTTPStatus.OK.value, res)
+                    else:
+                        return self.handleError(HTTPStatus.INTERNAL_SERVER_ERROR.value, Message[Constants.MSG_PRODUCT_NOT_FOUND])
+            except ValueError as e:
+                return self.handleError(HTTPStatus.BAD_REQUEST.value, Message[Constants.MSG_INVALID_PRODUCT_ID])
 
         return (product)
