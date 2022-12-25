@@ -4,6 +4,7 @@ from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 from controller.product.product import ProductController
 from controller.auth.auth import AuthController
+from controller.user.user import UserController
 
 def create_app():
     app = Flask(__name__, static_folder='images')
@@ -22,6 +23,8 @@ def create_app():
     app.register_blueprint(productCtrl.ProductBlueprint())
     authCtrl = AuthController(pg)
     app.register_blueprint(authCtrl.AuthBlueprint(app.config['UPLOAD_AVATAR'], bcrypt))
+    userCtrl = UserController(pg)
+    app.register_blueprint(userCtrl.UserBlueprint(app.config['UPLOAD_AVATAR']))
 
     return app
 

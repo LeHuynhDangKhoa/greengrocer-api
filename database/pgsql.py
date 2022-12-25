@@ -115,3 +115,28 @@ class PGSQL():
             return str(e)
         finally:
             cursor.close()
+
+    def GetUserById(self, id):
+        raw = 'select * from "user" where id = %s'
+        value = [id]
+        cursor = self.conn.cursor(cursor_factory=RealDictCursor)
+        try:
+            cursor.execute(raw, value)
+            return cursor.fetchone(), None
+        except psycopg2.Error as e:
+            return None, str(e)
+        finally:
+            cursor.close()
+
+    def UpdateUser(self, user):
+        raw = 'update "user" set username = %s, phone = %s, email = %s, image = %s, role = %s where id = %s'
+        values = [user["username"], user["phone"], user["email"], user["image"], user["role"], user["id"]]
+        cursor = self.conn.cursor(cursor_factory=RealDictCursor)
+        try:
+            cursor.execute(raw, values)
+            self.conn.commit()
+            return None
+        except psycopg2.Error as e:
+            return str(e)
+        finally:
+            cursor.close()

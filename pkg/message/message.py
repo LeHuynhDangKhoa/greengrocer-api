@@ -6,7 +6,8 @@ for constant in ['MSG_INVALID_CATEGORY_ID', 'MSG_INVALID_STAR', 'MSG_INVALID_DIS
                 'MSG_INVALID_PRICE_TO', 'MSG_INVALID_ORDER', 'MSG_INVALID_LIMIT', 'MSG_INVALID_OFFSET',
                 'MSG_INVALID_PRODUCT_ID', 'MSG_PRODUCT_NOT_FOUND', 'MSG_EXISTED_USERNAME', 'MSG_INVALID_PASSWORD',
                 'MSG_EMPTY_USERNAME', 'MSG_EMPTY_PASSWORD', 'MSG_INVALID_IMAGE', 'MSG_INVALID_ROLE',
-                'MSG_EMPTY_CREDENTIAL', 'MSG_INVALID_CREDENTIAL']:
+                'MSG_EMPTY_CREDENTIAL', 'MSG_INVALID_CREDENTIAL', 'MSG_INVALID_USER_ID', 'MSG_USER_NOT_FOUND',
+                'MSG_EMPTY_BODY']:
     setattr(Constants, constant, counter)
     counter += 1
 
@@ -29,6 +30,9 @@ Message = {
     Constants.MSG_INVALID_ROLE: "role must be admin or operator",
     Constants.MSG_EMPTY_CREDENTIAL: "username or password is empty in the request body",
     Constants.MSG_INVALID_CREDENTIAL: "invalid username or password",
+    Constants.MSG_INVALID_USER_ID: "user id parameter must be a number",
+    Constants.MSG_USER_NOT_FOUND: "This user had been deleted or does not exist",
+    Constants.MSG_EMPTY_BODY: "request body is empty",
 }
 
 

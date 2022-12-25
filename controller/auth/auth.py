@@ -1,4 +1,4 @@
-from flask import Blueprint, request, abort, Response
+from flask import Blueprint, request
 from database.pgsql import PGSQL
 from controller.base.base import BaseController
 from http import HTTPStatus
