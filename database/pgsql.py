@@ -80,7 +80,7 @@ class PGSQL():
             cursor.close()
 
     def GetProductById(self, id):
-        raw = "select * from product where id = %s"
+        raw = "select p.id, p.name, p.image, p.price::float, p.discount::float, p.price * (1 - p.discount)::float discounted_price, p.star, p.description, p.category_id from product p where id = %s"
         value = []
         value.append(id)
         cursor = self.conn.cursor(cursor_factory=RealDictCursor)
@@ -89,5 +89,29 @@ class PGSQL():
             return cursor.fetchone(), None
         except psycopg2.Error as e:
             return None, str(e)
+        finally:
+            cursor.close()
+
+    def GetUserByUsername(self, username):
+        raw = 'select * from "user" where username = %s'
+        value = [username]
+        cursor = self.conn.cursor(cursor_factory=RealDictCursor)
+        try:
+            cursor.execute(raw, value)
+            return cursor.fetchone(), None
+        except psycopg2.Error as e:
+            return None, str(e)
+        finally:
+            cursor.close()
+
+    def InsertNewUser(self, values):
+        raw = 'insert into "user" (username, password, phone, email, image, role) VALUES (%s, %s, %s, %s, %s, %s)'
+        cursor = self.conn.cursor(cursor_factory=RealDictCursor)
+        try:
+            cursor.execute(raw, values)
+            self.conn.commit()
+            return None
+        except psycopg2.Error as e:
+            return str(e)
         finally:
             cursor.close()

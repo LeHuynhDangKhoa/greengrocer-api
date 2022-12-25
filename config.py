@@ -6,6 +6,7 @@ class Config(object):
     CSRF_ENABLED = True
     # SECRET_KEY = '57e19ea558d4967a552d03deece34a70'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    UPLOAD_AVATAR = "images/avatar/" 
 
 class ProductionConfig(Config):
     DEBUG = False

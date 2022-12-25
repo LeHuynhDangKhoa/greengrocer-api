@@ -3,7 +3,6 @@ from database.pgsql import PGSQL
 from controller.base.base import BaseController
 from http import HTTPStatus
 from pkg.message.message import Message, Constants
-from flask_cors import CORS, cross_origin
 
 class ProductController(BaseController):
     def __init__(self, pgsql: PGSQL):
@@ -16,13 +15,6 @@ class ProductController(BaseController):
         def ProductList():           
             # Validate category_id > 0
             categoryId = request.args.get("category")
-            # if categoryId:
-            #     try:
-            #         categoryId = int(categoryId)
-            #         if categoryId <= 0:
-            #             raise ValueError(Message[Constants.MSG_INVALID_CATEGORY_ID])
-            #     except ValueError as e:
-            #         return self.handleError(HTTPStatus.BAD_REQUEST.value, Message[Constants.MSG_INVALID_CATEGORY_ID])
 
             # Validate star > 0
             star = request.args.get("star")
@@ -107,36 +99,41 @@ class ProductController(BaseController):
             # Validate search
             search = request.args.get("search")
 
-
+            # Get product list
             res, err = self.pgsql.ProductList(categoryId, star, discount, priceFrom, priceTo, search, order, sort, limit, offset)
             if err != None:
                 return self.handleError(HTTPStatus.INTERNAL_SERVER_ERROR.value, err)
-            else:
-                total = 0
-                if len(res) > 0:
-                    total = res[0]["total"]
-                return self.handleResponseList(HTTPStatus.OK.value, limit, offset, total, res)
+            
+            # Handle successfull response 
+            total = 0
+            if len(res) > 0:
+                total = res[0]["total"]
+            return self.handleResponseList(HTTPStatus.OK.value, limit, offset, total, res)
 
         @product.route('/categories', methods=['GET'])
         def CategoryList():
+            # Get category list
             res, err = self.pgsql.CategoryList()
             if err != None:
                 return self.handleError(HTTPStatus.INTERNAL_SERVER_ERROR.value, err)
-            else:
-                return self.handleResponse(HTTPStatus.OK.value, res)
+
+            # Handle successfull response
+            return self.handleResponse(HTTPStatus.OK.value, res)
 
         @product.route('/products/<id>', methods=['GET'])
         def ProductView(id):
             try:
+                # Get product by id
                 id = int(id)
                 res, err = self.pgsql.GetProductById(id)
                 if err != None:
                     return self.handleError(HTTPStatus.INTERNAL_SERVER_ERROR.value, err)
-                else:
-                    if res != None:
-                        return self.handleResponse(HTTPStatus.OK.value, res)
-                    else:
-                        return self.handleError(HTTPStatus.INTERNAL_SERVER_ERROR.value, Message[Constants.MSG_PRODUCT_NOT_FOUND])
+
+                if res == None:
+                    return self.handleError(HTTPStatus.INTERNAL_SERVER_ERROR.value, Message[Constants.MSG_PRODUCT_NOT_FOUND])
+                    
+                # Handle successfull response
+                return self.handleResponse(HTTPStatus.OK.value, res)
             except ValueError as e:
                 return self.handleError(HTTPStatus.BAD_REQUEST.value, Message[Constants.MSG_INVALID_PRODUCT_ID])
 
