@@ -7,7 +7,7 @@ class PGSQL():
         # self.conn = psycopg2.connect(config["DATABASE_URL"], connection_factory=LoggingConnection)
         self.conn = psycopg2.connect(config["DATABASE_URL"])
 
-    def ProductList(self, categoryId, star, discount, priceFrom, priceTo, search, order, sort, limit, offset):
+    def ProductList(self, category, star, discount, priceFrom, priceTo, search, order, sort, limit, offset):
         # logging.basicConfig(level=logging.DEBUG)
         # logger = logging.getLogger("dev")
         # self.conn.initialize(logger)
@@ -15,9 +15,9 @@ class PGSQL():
         filter = "true"
         filterValue = []
         # Handle categoryId
-        if categoryId != None:
+        if category != None:
             filter += " and c.name = %s"
-            filterValue.append(categoryId)
+            filterValue.append(category)
 
         # Handle star
         if star != None:
@@ -65,8 +65,8 @@ class PGSQL():
             return cursor.fetchall(), None
         except psycopg2.Error as e:
             return None, str(e)
-        finally:
-            cursor.close()        
+        # finally:
+        #     cursor.close()        
 
     def CategoryList(self):
         raw = "select c.id, c.name, count(p.category_id) total from category c left join product p on c.id = p.category_id group by p.category_id, c.id, c.name"
@@ -76,8 +76,8 @@ class PGSQL():
             return cursor.fetchall(), None
         except psycopg2.Error as e:
             return None, str(e)
-        finally:
-            cursor.close()
+        # finally:
+        #     cursor.close()
 
     def GetProductById(self, id):
         raw = "select p.id, p.name, p.image, p.price::float, p.discount::float, p.price * (1 - p.discount)::float discounted_price, p.star, p.description, p.category_id from product p where id = %s"
@@ -89,8 +89,8 @@ class PGSQL():
             return cursor.fetchone(), None
         except psycopg2.Error as e:
             return None, str(e)
-        finally:
-            cursor.close()
+        # finally:
+        #     cursor.close()
 
     def GetUserByUsername(self, username):
         raw = 'select * from "user" where username = %s'
@@ -101,8 +101,8 @@ class PGSQL():
             return cursor.fetchone(), None
         except psycopg2.Error as e:
             return None, str(e)
-        finally:
-            cursor.close()
+        # finally:
+        #     cursor.close()
 
     def InsertNewUser(self, values):
         raw = 'insert into "user" (username, password, phone, email, image, role) VALUES (%s, %s, %s, %s, %s, %s)'
@@ -113,8 +113,8 @@ class PGSQL():
             return None
         except psycopg2.Error as e:
             return str(e)
-        finally:
-            cursor.close()
+        # finally:
+        #     cursor.close()
 
     def GetUserById(self, id):
         raw = 'select * from "user" where id = %s'
@@ -125,8 +125,8 @@ class PGSQL():
             return cursor.fetchone(), None
         except psycopg2.Error as e:
             return None, str(e)
-        finally:
-            cursor.close()
+        # finally:
+        #     cursor.close()
 
     def UpdateUser(self, user):
         raw = 'update "user" set username = %s, phone = %s, email = %s, image = %s, role = %s where id = %s'
@@ -138,5 +138,53 @@ class PGSQL():
             return None
         except psycopg2.Error as e:
             return str(e)
-        finally:
-            cursor.close()
+        # finally:
+        #     cursor.close()
+
+    def GetCategoryByName(self, name):
+        raw = 'select * from category where name = %s'
+        value = [name]
+        cursor = self.conn.cursor(cursor_factory=RealDictCursor)
+        try:
+            cursor.execute(raw, value)
+            return cursor.fetchone(), None
+        except psycopg2.Error as e:
+            return None, str(e)
+        # finally:
+        #     cursor.close()
+
+    def InsertNewCategory(self, values):
+        raw = 'insert into category (name) VALUES (%s)'
+        cursor = self.conn.cursor(cursor_factory=RealDictCursor)
+        try:
+            cursor.execute(raw, values)
+            self.conn.commit()
+            return None
+        except psycopg2.Error as e:
+            return str(e)
+        # finally:
+        #     cursor.close()
+
+    def GetProductByName(self, name):
+        raw = 'select * from product where name = %s'
+        value = [name]
+        cursor = self.conn.cursor(cursor_factory=RealDictCursor)
+        try:
+            cursor.execute(raw, value)
+            return cursor.fetchone(), None
+        except psycopg2.Error as e:
+            return None, str(e)
+        # finally:
+        #     cursor.close()
+
+    def InsertNewProduct(self, values):
+        raw = 'insert into product (name, price, star, description, discount, category_id, image) VALUES (%s, %s, %s, %s, %s, %s, %s)'
+        cursor = self.conn.cursor(cursor_factory=RealDictCursor)
+        try:
+            cursor.execute(raw, values)
+            self.conn.commit()
+            return None
+        except psycopg2.Error as e:
+            return str(e)
+        # finally:
+        #     cursor.close()
