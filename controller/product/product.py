@@ -7,6 +7,7 @@ from werkzeug.utils import secure_filename
 import hashlib
 from datetime import datetime
 import imghdr
+import os
 
 class ProductController(BaseController):
     def __init__(self, pgsql: PGSQL):
@@ -316,16 +317,19 @@ class ProductController(BaseController):
             try:
                 # Get product by id
                 id = int(id)
-                res, err = self.pgsql.GetProductById(id)
+                product, err = self.pgsql.GetProductById(id)
                 if err != None:
                     return self.handleError(HTTPStatus.INTERNAL_SERVER_ERROR.value, err)
 
-                if res == None:
+                if product == None:
                     return self.handleError(HTTPStatus.INTERNAL_SERVER_ERROR.value, Message[Constants.MSG_PRODUCT_NOT_FOUND])
 
                 err = self.pgsql.DeleteProduct(id)
                 if err != None:
                     return self.handleError(HTTPStatus.INTERNAL_SERVER_ERROR.value, err)
+
+                if product["image"] != "":
+                    os.remove(product["image"])
                     
                 # Handle successfull response
                 return self.handleResponse(HTTPStatus.OK.value, id)
