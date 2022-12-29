@@ -301,6 +301,9 @@ class ProductController(BaseController):
                         return self.handleError(HTTPStatus.BAD_REQUEST.value, Message[Constants.MSG_INVALID_IMAGE])
                 else:
                     product["image"] = ""
+                print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: ", oldAvatar)
+                if oldAvatar != "":
+                    os.remove(oldAvatar)
                                             
                 # Update new product
                 err = self.pgsql.UpdateProduct(product)
