@@ -186,7 +186,7 @@ class ProductController(BaseController):
                     return self.handleError(HTTPStatus.BAD_REQUEST.value, Message[Constants.MSG_INVALID_PRODUCT_DISCOUNT])
             values.append(discount)
 
-            # Validate star
+            # Validate category
             categoryId = 0
             if "category_id" in request.form:
                 try:
@@ -222,4 +222,114 @@ class ProductController(BaseController):
             # Handle successfull response
             return self.handleResponse(HTTPStatus.OK.value, "")
 
+        @product.route('/products/<id>', methods=['PUT'])
+        def ProductEdit(id):
+            try:
+                # Get product by id
+                id = int(id)
+                product, err = self.pgsql.GetProductById(id)
+                if err != None:
+                    return self.handleError(HTTPStatus.INTERNAL_SERVER_ERROR.value, err)
+
+                if product == None:
+                    return self.handleError(HTTPStatus.INTERNAL_SERVER_ERROR.value, Message[Constants.MSG_PRODUCT_NOT_FOUND])
+
+                # Get updated field
+                oldName = product["name"]
+                oldAvatar = product["image"]
+                for key, value in request.form.items():
+                    if key in product and key != "id":
+                        product[key] = value
+                
+                # Check username if name
+                if oldName != product["name"]:
+                    res, err = self.pgsql.GetProductByName(product["name"])
+                    if err != None:
+                        return self.handleError(HTTPStatus.INTERNAL_SERVER_ERROR.value, err)
+                    if res != None:
+                        return self.handleError(HTTPStatus.BAD_REQUEST.value, Message[Constants.MSG_EXISTED_PRODUCT_NAME])
+
+                # Validate price
+                try:
+                    price = float(product["price"])
+                    if price < 0:
+                        raise ValueError(Message[Constants.MSG_INVALID_PRICE])
+                except ValueError as e:
+                    return self.handleError(HTTPStatus.BAD_REQUEST.value, Message[Constants.MSG_INVALID_PRICE])
+
+                # Validate star
+                star = 3
+                try:
+                    star = int(product["star"])
+                    if star < 0 or star > 5:
+                        raise ValueError(Message[Constants.MSG_INVALID_STAR])
+                except ValueError as e:
+                    return self.handleError(HTTPStatus.BAD_REQUEST.value, Message[Constants.MSG_INVALID_STAR])
+
+                # Validate discount
+                try:
+                    discount = float(product["discount"])
+                    if discount < 0 or discount > 1:
+                        raise ValueError(Message[Constants.MSG_INVALID_PRODUCT_DISCOUNT])
+                except ValueError as e:
+                    return self.handleError(HTTPStatus.BAD_REQUEST.value, Message[Constants.MSG_INVALID_PRODUCT_DISCOUNT])
+
+                # Validate category_id
+                try:
+                    categoryId = int(product["category_id"])
+                    if categoryId < 0:
+                        raise ValueError(Message[Constants.MSG_INVALID_CATEGORY_ID])
+                except ValueError as e:
+                    return self.handleError(HTTPStatus.BAD_REQUEST.value, Message[Constants.MSG_INVALID_CATEGORY_ID])
+
+                # Validate image
+                image = ""
+                if "image" in request.files:
+                    file = request.files["image"]
+                    if file and imghdr.what(file) != None:
+                        # Hash filename to MD5
+                        hash = hashlib.md5()
+                        hash.update((secure_filename(file.filename) + str(datetime.now())).encode())
+                        filename = hash.hexdigest() + "." + secure_filename(file.filename).split(".")[len(secure_filename(file.filename).split(".")) - 1]
+
+                        # Store file
+                        image = productPath + filename
+                        file.save(image)
+                        product["image"] = image
+                    else:
+                        return self.handleError(HTTPStatus.BAD_REQUEST.value, Message[Constants.MSG_INVALID_IMAGE])
+                else:
+                    product["image"] = ""
+                                            
+                # Update new product
+                err = self.pgsql.UpdateProduct(product)
+                if err != None:
+                    return self.handleError(HTTPStatus.INTERNAL_SERVER_ERROR.value, err)
+                
+                # Handle successfull response
+                return self.handleResponse(HTTPStatus.OK.value, "")
+            except ValueError as e:
+                return self.handleError(HTTPStatus.BAD_REQUEST.value, Message[Constants.MSG_INVALID_PRODUCT_ID])
+        
+        @product.route('/products/<id>', methods=['DELETE'])
+        def ProductDelete(id):
+            try:
+                # Get product by id
+                id = int(id)
+                res, err = self.pgsql.GetProductById(id)
+                if err != None:
+                    return self.handleError(HTTPStatus.INTERNAL_SERVER_ERROR.value, err)
+
+                if res == None:
+                    return self.handleError(HTTPStatus.INTERNAL_SERVER_ERROR.value, Message[Constants.MSG_PRODUCT_NOT_FOUND])
+
+                err = self.pgsql.DeleteProduct(id)
+                if err != None:
+                    return self.handleError(HTTPStatus.INTERNAL_SERVER_ERROR.value, err)
+                    
+                # Handle successfull response
+                return self.handleResponse(HTTPStatus.OK.value, id)
+            except ValueError as e:
+                return self.handleError(HTTPStatus.BAD_REQUEST.value, Message[Constants.MSG_INVALID_PRODUCT_ID])
+        
         return (product)
