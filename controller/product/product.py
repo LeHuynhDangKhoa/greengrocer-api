@@ -242,7 +242,7 @@ class ProductController(BaseController):
                     if key in product and key != "id":
                         product[key] = value
                 
-                # Check username if name
+                # Check name if existed
                 if oldName != product["name"]:
                     res, err = self.pgsql.GetProductByName(product["name"])
                     if err != None:
@@ -301,7 +301,6 @@ class ProductController(BaseController):
                         return self.handleError(HTTPStatus.BAD_REQUEST.value, Message[Constants.MSG_INVALID_IMAGE])
                 else:
                     product["image"] = ""
-                print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa: ", oldAvatar)
                 if oldAvatar != "":
                     os.remove(oldAvatar)
                                             

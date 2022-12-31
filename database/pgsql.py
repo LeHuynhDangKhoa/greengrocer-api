@@ -7,7 +7,7 @@ class PGSQL():
     def __init__(self, config):
         # self.conn = psycopg2.connect(config["DATABASE_URL"], connection_factory=LoggingConnection)
         try: 
-            self.pool = pool.ThreadedConnectionPool(5, 50, config["DATABASE_URL"])
+            self.pool = pool.ThreadedConnectionPool(1, 50, config["DATABASE_URL"])
             if self.pool :
                 print("Connection pool created successfully using ThreadedConnectionPool")
         except (Exception, psycopg2.DatabaseError) as error:
@@ -174,9 +174,9 @@ class PGSQL():
     def GetCategoryByName(self, name):
         raw = 'select * from category where name = %s'
         value = [name]
-        conn = pool.getconn()
+        conn = self.pool.getconn()
         conn.autocommit = True
-        cursor = self.conn.cursor(cursor_factory=RealDictCursor)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
         try:
             cursor.execute(raw, value)
             return cursor.fetchone(), None
@@ -262,4 +262,68 @@ class PGSQL():
         finally:
             cursor.close()
             self.pool.putconn(conn)
+
+    def GetCategoryById(self, id):
+        raw = 'select * from category where id = %s'
+        value = [id]
+        conn = self.pool.getconn()
+        conn.autocommit = True
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        try:
+            cursor.execute(raw, value)
+            return cursor.fetchone(), None
+        except psycopg2.Error as e:
+            return None, str(e)
+        finally:
+            cursor.close()
+            self.pool.putconn(conn)
+
+    def CountProductsLinkWithCategory(self, id):
+        raw = "select count(*) from product where category_id = %s"
+        value = [id]
+        conn = self.pool.getconn()
+        conn.autocommit = True
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        try:
+            cursor.execute(raw, value)
+            return cursor.fetchone(), None
+        except psycopg2.Error as e:
+            return None, str(e)
+        finally:
+            cursor.close()
+            self.pool.putconn(conn)
+    
+    def UpdateCategory(self, category):
+        raw = 'update category set name = %s where id = %s'
+        values = [category["name"], category["id"]]
+        conn = self.pool.getconn()
+        conn.autocommit = True
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        try:
+            cursor.execute(raw, values)
+            conn.commit()
+            return None
+        except psycopg2.Error as e:
+            return str(e)
+        finally:
+            cursor.close()
+            self.pool.putconn(conn)
+
+    def DeleteCategory(self, id):
+        raw = 'delete from category where id = %s'
+        value = [id]
+        conn = self.pool.getconn()
+        conn.autocommit = True
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        try:
+            cursor.execute(raw, value)
+            conn.commit()
+            return None
+        except psycopg2.Error as e:
+            return str(e)
+        finally:
+            cursor.close()
+            self.pool.putconn(conn)
+
+
 

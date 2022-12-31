@@ -8,7 +8,8 @@ for constant in ['MSG_INVALID_CATEGORY_ID', 'MSG_INVALID_STAR', 'MSG_INVALID_DIS
                 'MSG_EMPTY_USERNAME', 'MSG_EMPTY_PASSWORD', 'MSG_INVALID_IMAGE', 'MSG_INVALID_ROLE',
                 'MSG_EMPTY_CREDENTIAL', 'MSG_INVALID_CREDENTIAL', 'MSG_INVALID_USER_ID', 'MSG_USER_NOT_FOUND',
                 'MSG_EMPTY_BODY', 'MSG_EMPTY_CATEGORY_NAME', 'MSG_EXISTED_CATEGORY_NAME', 'MSG_EMPTY_PRODUCT_NAME',
-                'MSG_EMPTY_PRICE', 'MSG_INVALID_PRICE', 'MSG_INVALID_PRODUCT_DISCOUNT', 'MSG_EXISTED_PRODUCT_NAME']:
+                'MSG_EMPTY_PRICE', 'MSG_INVALID_PRICE', 'MSG_INVALID_PRODUCT_DISCOUNT', 'MSG_EXISTED_PRODUCT_NAME',
+                'MSG_CATEGORY_NOT_FOUND', 'MSG_CANNOT_DELETE_CATEGORY']:
     setattr(Constants, constant, counter)
     counter += 1
 
@@ -41,6 +42,8 @@ Message = {
     Constants.MSG_INVALID_PRICE: "price must be greater than 0",
     Constants.MSG_INVALID_PRODUCT_DISCOUNT: "discount must have value from 0 to 1",
     Constants.MSG_EXISTED_PRODUCT_NAME: "product name existed in the system",
+    Constants.MSG_CATEGORY_NOT_FOUND: "This category had been deleted or does not exist",
+    Constants.MSG_CANNOT_DELETE_CATEGORY: "cannot delete category that linked with products",
 }
 
 
