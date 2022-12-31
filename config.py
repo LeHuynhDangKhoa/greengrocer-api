@@ -11,7 +11,8 @@ class Config(object):
 
 class ProductionConfig(Config):
     DEBUG = False
-    DATABASE_URL = os.environ.get('DATABASE_URL')
+    # DATABASE_URL = os.environ.get('DATABASE_URL')
+    DATABASE_URL="host=db.tdibbpoblindfigtbcqo.supabase.co user=postgres password=flask_postgres_20521025 dbname=postgres port=6543"
 
 class DevelopmentConfig(Config):
     ENV="development"

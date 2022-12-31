@@ -16,6 +16,7 @@ def create_app():
     app.config['CORS_HEADERS'] = 'Content-Type'
 
     # setup with the configuration provided
+    # app.config.from_object('config.DevelopmentConfig')
     app.config.from_object('config.DevelopmentConfig')
 
     # setup all our dependencies
