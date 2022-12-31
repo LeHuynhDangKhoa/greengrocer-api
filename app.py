@@ -17,7 +17,7 @@ def create_app():
 
     # setup with the configuration provided
     # app.config.from_object('config.DevelopmentConfig')
-    app.config.from_object('config.DevelopmentConfig')
+    app.config.from_object('config.ProductionConfig')
 
     # setup all our dependencies
     pg = pgsql.PGSQL(app.config)
