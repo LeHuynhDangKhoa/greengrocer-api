@@ -6,6 +6,8 @@ from controller.product.product import ProductController
 from controller.auth.auth import AuthController
 from controller.user.user import UserController
 from controller.category.category import CategoryController
+from controller.coupon.coupon import CouponController
+from controller.cart.cart import CartController
 
 def create_app():
     app = Flask(__name__, static_folder='images')
@@ -28,6 +30,10 @@ def create_app():
     app.register_blueprint(userCtrl.UserBlueprint(app.config['UPLOAD_AVATAR']))
     categoryCtrl = CategoryController(pg)
     app.register_blueprint(categoryCtrl.CategoryBlueprint())
+    couponCtrl = CouponController(pg)
+    app.register_blueprint(couponCtrl.CouponBlueprint())
+    cartCtrl = CartController(pg)
+    app.register_blueprint(cartCtrl.CartBlueprint())
 
     return app
 

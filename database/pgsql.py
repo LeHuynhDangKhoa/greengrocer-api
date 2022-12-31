@@ -69,7 +69,7 @@ class PGSQL():
 
         raw = "select p.id, p.name, p.image, p.price::float, p.discount::float, p.price * (1 - p.discount)::float discounted_price, p.star, p.description, p.category_id, count(*) over() total from product p left join category c on c.id = p.category_id where " + filter
         conn = self.pool.getconn()
-        conn.autocommit = True
+        # conn.autocommit = True
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         try:
             cursor.execute(raw, filterValue)
@@ -83,7 +83,7 @@ class PGSQL():
     def CategoryList(self):
         raw = "select c.id, c.name, count(p.category_id) total from category c left join product p on c.id = p.category_id group by p.category_id, c.id, c.name"
         conn = self.pool.getconn()
-        conn.autocommit = True
+        # conn.autocommit = True
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         try:
             cursor.execute(raw)
@@ -99,7 +99,7 @@ class PGSQL():
         value = []
         value.append(id)
         conn = self.pool.getconn()
-        conn.autocommit = True
+        # conn.autocommit = True
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         try:
             cursor.execute(raw, value)
@@ -128,7 +128,7 @@ class PGSQL():
     def InsertNewUser(self, values):
         raw = 'insert into "user" (username, password, phone, email, image, role) VALUES (%s, %s, %s, %s, %s, %s)'
         conn = self.pool.getconn()
-        conn.autocommit = True
+        # conn.autocommit = True
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         try:
             cursor.execute(raw, values)
@@ -159,7 +159,7 @@ class PGSQL():
         raw = 'update "user" set username = %s, phone = %s, email = %s, image = %s, role = %s where id = %s'
         values = [user["username"], user["phone"], user["email"], user["image"], user["role"], user["id"]]
         conn = self.pool.getconn()
-        conn.autocommit = True
+        # conn.autocommit = True
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         try:
             cursor.execute(raw, values)
@@ -175,7 +175,7 @@ class PGSQL():
         raw = 'select * from category where name = %s'
         value = [name]
         conn = self.pool.getconn()
-        conn.autocommit = True
+        # conn.autocommit = True
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         try:
             cursor.execute(raw, value)
@@ -189,7 +189,7 @@ class PGSQL():
     def InsertNewCategory(self, values):
         raw = 'insert into category (name) VALUES (%s)'
         conn = self.pool.getconn()
-        conn.autocommit = True
+        # conn.autocommit = True
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         try:
             cursor.execute(raw, values)
@@ -219,7 +219,7 @@ class PGSQL():
     def InsertNewProduct(self, values):
         raw = 'insert into product (name, price, star, description, discount, category_id, image) VALUES (%s, %s, %s, %s, %s, %s, %s)'
         conn = self.pool.getconn()
-        conn.autocommit = True
+        # conn.autocommit = True
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         try:
             cursor.execute(raw, values)
@@ -235,7 +235,7 @@ class PGSQL():
         raw = 'update product set name = %s, image = %s, price = %s, discount = %s, star = %s, description = %s, category_id = %s where id = %s'
         values = [product["name"], product["image"], product["price"], product["discount"], product["star"], product["description"], product["category_id"], product["id"]]
         conn = self.pool.getconn()
-        conn.autocommit = True
+        # conn.autocommit = True
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         try:
             cursor.execute(raw, values)
@@ -251,7 +251,7 @@ class PGSQL():
         raw = 'delete from product where id = %s'
         value = [id]
         conn = self.pool.getconn()
-        conn.autocommit = True
+        # conn.autocommit = True
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         try:
             cursor.execute(raw, value)
@@ -267,7 +267,7 @@ class PGSQL():
         raw = 'select * from category where id = %s'
         value = [id]
         conn = self.pool.getconn()
-        conn.autocommit = True
+        # conn.autocommit = True
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         try:
             cursor.execute(raw, value)
@@ -282,7 +282,7 @@ class PGSQL():
         raw = "select count(*) from product where category_id = %s"
         value = [id]
         conn = self.pool.getconn()
-        conn.autocommit = True
+        # conn.autocommit = True
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         try:
             cursor.execute(raw, value)
@@ -297,7 +297,7 @@ class PGSQL():
         raw = 'update category set name = %s where id = %s'
         values = [category["name"], category["id"]]
         conn = self.pool.getconn()
-        conn.autocommit = True
+        # conn.autocommit = True
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         try:
             cursor.execute(raw, values)
@@ -313,11 +313,51 @@ class PGSQL():
         raw = 'delete from category where id = %s'
         value = [id]
         conn = self.pool.getconn()
-        conn.autocommit = True
+        # conn.autocommit = True
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         try:
             cursor.execute(raw, value)
             conn.commit()
+            return None
+        except psycopg2.Error as e:
+            return str(e)
+        finally:
+            cursor.close()
+            self.pool.putconn(conn)
+
+    def GetCouponByCode(self, code):
+        raw = 'select id, code, discount::float, valid_from, valid_to from coupon where code = %s'
+        value = [code]
+        conn = self.pool.getconn()
+        # conn.autocommit = True
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        try:
+            cursor.execute(raw, value)
+            return cursor.fetchone(), None
+        except psycopg2.Error as e:
+            return None, str(e)
+        finally:
+            cursor.close()
+            self.pool.putconn(conn)
+
+    def CartStore(self, data):
+        raw = 'insert into "order" (user_id, status, customer, delivery_address, total_price, total_quantity) VALUES (%s, %s, %s, %s, %s, %s) returning id'
+        values = [data["user_id"], 1, data["customer_name"], data["customer_address"], data["detail"]["total_price"], data["detail"]["total_quantity"]]
+        conn = self.pool.getconn()
+        # conn.autocommit = True
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
+        try:
+            cursor.execute(raw, values)
+            id = cursor.fetchone()
+            for value in data["detail"]["data"]:
+                raw = 'insert into order_detail (product_id, order_id, quantity) values(%s, %s, %s)'
+                values = [value["id"], id["id"], value["quantity"]]
+                try:
+                    cursor.execute(raw, values)
+                except psycopg2.Error as e:
+                    return str(e)
+            conn.commit()
+
             return None
         except psycopg2.Error as e:
             return str(e)

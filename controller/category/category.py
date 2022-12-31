@@ -3,7 +3,6 @@ from database.pgsql import PGSQL
 from controller.base.base import BaseController
 from http import HTTPStatus
 from pkg.message.message import Message, Constants
-from werkzeug.utils import secure_filename
 
 class CategoryController(BaseController):
     def __init__(self, pgsql: PGSQL):
