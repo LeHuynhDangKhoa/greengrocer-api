@@ -341,7 +341,7 @@ class PGSQL():
             self.pool.putconn(conn)
 
     def CartStore(self, data):
-        raw = 'insert into "order" (user_id, status, customer, delivery_address, total_price, total_quantity) VALUES (%s, %s, %s, %s, %s, %s) returning id'
+        raw = 'insert into cart (user_id, status, customer, delivery_address, total_price, total_quantity) VALUES (%s, %s, %s, %s, %s, %s) returning id'
         values = [data["user_id"], 1, data["customer_name"], data["customer_address"], data["detail"]["total_price"], data["detail"]["total_quantity"]]
         conn = self.pool.getconn()
         # conn.autocommit = True
@@ -350,7 +350,7 @@ class PGSQL():
             cursor.execute(raw, values)
             id = cursor.fetchone()
             for value in data["detail"]["data"]:
-                raw = 'insert into order_detail (product_id, order_id, quantity) values(%s, %s, %s)'
+                raw = 'insert into cart_detail (product_id, order_id, quantity) values(%s, %s, %s)'
                 values = [value["id"], id["id"], value["quantity"]]
                 try:
                     cursor.execute(raw, values)
