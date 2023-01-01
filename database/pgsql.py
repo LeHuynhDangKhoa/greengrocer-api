@@ -350,7 +350,7 @@ class PGSQL():
             cursor.execute(raw, values)
             id = cursor.fetchone()
             for value in data["detail"]["data"]:
-                raw = 'insert into cart_detail (product_id, order_id, quantity) values(%s, %s, %s)'
+                raw = 'insert into cart_detail (product_id, cart_id, quantity) values(%s, %s, %s)'
                 values = [value["id"], id["id"], value["quantity"]]
                 try:
                     cursor.execute(raw, values)
