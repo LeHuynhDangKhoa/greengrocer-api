@@ -12,7 +12,7 @@ class CartController(BaseController):
         cart = Blueprint('cart', __name__)
 
         @cart.route('/cart/store', methods=['POST'])
-        def CouponGet():
+        def CartStore():
             # Validate detail
             if "detail" not in request.json:
                 return self.handleError(HTTPStatus.BAD_REQUEST.value, Message[Constants.MSG_EMPTY_CART])
