@@ -10,6 +10,12 @@ from controller.coupon.coupon import CouponController
 from controller.cart.cart import CartController
 
 def create_app():
+    """
+    Khởi tạo ứng dụng
+    Input:
+    Output:
+        Flask
+    """
     app = Flask(__name__, static_folder='images')
     CORS(app)
     bcrypt = Bcrypt(app)

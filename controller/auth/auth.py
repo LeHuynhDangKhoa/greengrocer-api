@@ -9,14 +9,40 @@ from datetime import datetime
 import imghdr
 
 class AuthController(BaseController):
+    """
+    Xử lý các chức năng xác thực tài khoản
+    Attribute
+        pgsql: chứa dữ liệu kết nối với cơ sở dữ liệu để thực hiện truy vấn
+    """
     def __init__(self, pgsql: PGSQL):
+        """
+        Khởi tạo class 
+        Input:
+	        pgsql (class PGSQL): class dùng để truy vấn đến cơ sở dữ liệu PostgreSQL
+        Output:
+            None
+        """
         self.pgsql = pgsql
 
     def AuthBlueprint(self, avataPath, bcrypt):
+        """
+        Tạo Blueprint dùng để đăng kí cho thư viện flask
+        Input:
+	        avatarPath (string): đường dẫn thư mục chứa avatar của người dùng
+	        bycrypt (class Bcrypt): class dùng để mã hóa password
+        Output:
+            Blueprint
+        """
         auth = Blueprint('auth', __name__)
 
         @auth.route('/register', methods=['POST'])
         def Register():
+            """
+            Đăng kí tài khoản mới
+            Input:
+            Output:
+                Response
+            """
             values = []
             # Validate username
             if "username" in request.form:
@@ -88,6 +114,12 @@ class AuthController(BaseController):
 
         @auth.route('/login', methods=['POST'])
         def Login():
+            """
+            Đăng nhập tài khoản
+            Input:
+            Output:
+                Response
+            """
             # Validate input
             if "username" not in request.json or "password" not in request.json:
                 return self.handleError(HTTPStatus.BAD_REQUEST.value, Message[Constants.MSG_EMPTY_CREDENTIAL])

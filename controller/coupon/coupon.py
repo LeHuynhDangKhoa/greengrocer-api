@@ -6,14 +6,39 @@ from pkg.message.message import Message, Constants
 from datetime import datetime
 
 class CouponController(BaseController):
+    """
+    Xử lý các chức năng liên quan đến mã giảm giá
+    Attribute
+        pgsql: chứa dữ liệu kết nối với cơ sở dữ liệu để thực hiện truy vấn
+    """
     def __init__(self, pgsql: PGSQL):
+        """
+        Khởi tạo class 
+        Input:
+	        pgsql (class PGSQL): class dùng để truy vấn đến cơ sở dữ liệu PostgreSQL
+        Output:
+            None
+        """
         self.pgsql = pgsql
 
     def CouponBlueprint(self):
+        """
+        Tạo Blueprint dùng để đăng kí cho thư viện flask
+        Input:
+        Output:
+            Blueprint
+        """
         coupon = Blueprint('coupon', __name__)
 
         @coupon.route('/coupon/<code>', methods=['GET'])
         def CouponGet(code):
+            """
+            Lấy thông tin mã giảm giá
+            Input:
+                code (string): mã giảm giá
+            Output:
+                Response
+            """
             # Get coupon
             coupon, err = self.pgsql.GetCouponByCode(code)
             if err != None:

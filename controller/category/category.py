@@ -5,14 +5,38 @@ from http import HTTPStatus
 from pkg.message.message import Message, Constants
 
 class CategoryController(BaseController):
+    """
+    Xử lý các chức năng liên quan đến danh mục sản phẩm
+    Attribute
+        pgsql: chứa dữ liệu kết nối với cơ sở dữ liệu để thực hiện truy vấn
+    """
     def __init__(self, pgsql: PGSQL):
+        """
+        Khởi tạo class 
+        Input:
+	        pgsql (class PGSQL): class dùng để truy vấn đến cơ sở dữ liệu PostgreSQL
+        Output:
+            None
+        """
         self.pgsql = pgsql
 
     def CategoryBlueprint(self):
+        """
+        Tạo Blueprint dùng để đăng kí cho thư viện flask
+        Input:
+        Output:
+            Blueprint
+        """
         category = Blueprint('category', __name__)
 
         @category.route('/categories', methods=['GET'])
         def CategoryList():
+            """
+            Lấy danh sách danh mục sản phẩm
+            Input:
+            Output:
+                Response
+            """
             # Get category list
             res, err = self.pgsql.CategoryList()
             if err != None:
@@ -23,6 +47,12 @@ class CategoryController(BaseController):
 
         @category.route('/categories', methods=['POST'])
         def CategoryAdd():
+            """
+            Tạo danh mục sản phẩm
+            Input:
+            Output:
+                Response
+            """
             values = []
             # Validate name
             if "name" in request.json:
@@ -46,6 +76,13 @@ class CategoryController(BaseController):
 
         @category.route('/categories/<id>', methods=['PUT'])
         def CategoryUpdate(id):
+            """
+            Cập nhật danh mục sản phẩm theo id
+            Input:
+                id (int): id của danh mục sản phẩm
+            Output:
+                Response
+            """
             try:
                 # Get product by id
                 id = int(id)
@@ -82,6 +119,13 @@ class CategoryController(BaseController):
 
         @category.route('/categories/<id>', methods=['DELETE'])
         def CategoryDelete(id):
+            """
+            Xóa danh mục sản phẩm theo id
+            Input:
+                id (int): id của danh mục sản phẩm
+            Output:
+                Response
+            """
             try:
                 # Get category by id
                 id = int(id)

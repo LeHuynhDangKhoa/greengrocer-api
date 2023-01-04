@@ -10,14 +10,39 @@ import imghdr
 import os
 
 class ProductController(BaseController):
+    """
+    Xử lý các chức năng liên quan đến sản phẩm
+    Attribute
+        pgsql: chứa dữ liệu kết nối với cơ sở dữ liệu để thực hiện truy vấn
+    """
     def __init__(self, pgsql: PGSQL):
+        """
+        Khởi tạo class 
+        Input:
+	        pgsql (class PGSQL): class dùng để truy vấn đến cơ sở dữ liệu PostgreSQL
+        Output:
+            None
+        """
         self.pgsql = pgsql
 
     def ProductBlueprint(self, productPath):
+        """
+        Tạo Blueprint dùng để đăng kí cho thư viện flask
+        Input:
+            productPath (string): đường dẫn thư mục chứa hình ảnh của sản phẩm
+        Output:
+            Blueprint
+        """
         product = Blueprint('product', __name__)
 
         @product.route('/products', methods=['GET'])
-        def ProductList():           
+        def ProductList():     
+            """
+            Lấy danh sách sản phẩm
+            Input:
+            Output:
+                Response
+            """      
             # Validate category_id > 0
             categoryId = request.args.get("category")
 
@@ -117,6 +142,13 @@ class ProductController(BaseController):
 
         @product.route('/products/<id>', methods=['GET'])
         def ProductView(id):
+            """
+            Lấy thông tin sản phẩm theo id
+            Input:
+            	id (int): id của sản phẩm
+            Output:
+                Response
+            """
             try:
                 # Get product by id
                 id = int(id)
@@ -134,6 +166,12 @@ class ProductController(BaseController):
 
         @product.route('/products', methods=['POST'])
         def ProductAdd():
+            """
+            Tạo sản phẩm
+            Input:
+            Output:
+                Response
+            """
             values = []
             # Validate name
             if "name" in request.form:
@@ -225,6 +263,13 @@ class ProductController(BaseController):
 
         @product.route('/products/<id>', methods=['PUT'])
         def ProductEdit(id):
+            """
+            Cập nhật sản phẩm theo id
+            Input:
+                id (int): id của sản phẩm
+            Output:
+                Response
+            """
             try:
                 # Get product by id
                 id = int(id)
@@ -316,6 +361,13 @@ class ProductController(BaseController):
         
         @product.route('/products/<id>', methods=['DELETE'])
         def ProductDelete(id):
+            """
+            Xóa sản phẩm theo id
+            Input:
+                id (int): id của sản phẩm
+            Output:
+                Response
+            """
             try:
                 # Get product by id
                 id = int(id)
