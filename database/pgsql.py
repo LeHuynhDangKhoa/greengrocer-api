@@ -42,6 +42,7 @@ class PGSQL():
         filterValue = []
         # Handle categoryId
         if category != None:
+            category = str(category).replace('_', ' ')
             filter += " and c.name = %s"
             filterValue.append(category)
 
